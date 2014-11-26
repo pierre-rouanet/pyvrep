@@ -36,7 +36,7 @@ def spawn_vrep(port=19997, gui=False,
     if not gui:
         args.append('-h')
     if scene is not None:
-        args.append(scene)
+        args.append(os.path.join(os.getcwd(), scene))
 
         if start:
             args.append('-s')
@@ -48,9 +48,11 @@ def spawn_vrep(port=19997, gui=False,
         p = Popen([vrep_bin] + args, stdout=PIPE)
         vrep_processes.append(p)
 
-        # Just give enough time for vrep to actually starts
-        # The remote API server
-        time.sleep(2)
+        # Just give enough time to vrep to
+        # actually starts the remote API server
+        time.sleep(10 if gui else 2)
+
+    return p
 
 
 def killall_vrep():
