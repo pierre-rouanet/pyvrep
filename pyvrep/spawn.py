@@ -8,7 +8,7 @@ from multiprocessing import Lock
 
 from _env import VREP_PATH
 
-vrep_processes = []
+vrep_processes = {}
 vrep_bin_folder = os.path.join(VREP_PATH,
                                ('vrep.app/Contents/MacOS'
                                 if platform.system() == 'Darwin' else ''))
@@ -26,8 +26,7 @@ portIndex1_syncSimTrigger       = true
 _spawn_lock = Lock()
 
 
-def spawn_vrep(port=19997, gui=False,
-               scene=None, start=False):
+def spawn_vrep(gui=False, scene=None, start=False):
 
     if not os.path.exists(bkp_config):
         shutil.move(config, bkp_config)
@@ -42,20 +41,26 @@ def spawn_vrep(port=19997, gui=False,
             args.append('-s')
 
     with _spawn_lock:
+        port = 29997
+        while port in vrep_processes:
+            port += 1
+
         with open(config, 'w') as f:
             f.write(vrep_config_template.format(port))
 
         p = Popen([vrep_bin] + args, stdout=PIPE)
-        vrep_processes.append(p)
+        vrep_processes[port] = p
 
         # Just give enough time to vrep to
         # actually starts the remote API server
         time.sleep(10 if gui else 2)
 
-    return p
+    return p, port
+
+
+def stop_vrep(port):
+    vrep_processes.pop(port).terminate()
 
 
 def killall_vrep():
-    while vrep_processes:
-        p = vrep_processes.pop()
-        p.terminate()
+    [stop_vrep(port) for port in vrep_processes]

@@ -22,8 +22,9 @@ class MyWalkingXP(PoppyVrepXp):
 
 
 if __name__ == '__main__':
-    xp = MyWalkingXP(19999, '../pypot/samples/notebooks/poppy-standing.ttt', gui=True)
-    xp2 = MyWalkingXP(19998, '../pypot/samples/notebooks/poppy-sitting.ttt', gui=True)
+    xp = MyWalkingXP('../pypot/samples/notebooks/poppy-standing.ttt', gui=True)
+    xp2 = MyWalkingXP('../pypot/samples/notebooks/poppy-sitting.ttt', gui=True)
+    xp3 = MyWalkingXP('../pypot/samples/notebooks/poppy-sitting.ttt', gui=True)
 
     xp.start()
     xp2.start()

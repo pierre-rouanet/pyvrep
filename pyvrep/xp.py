@@ -1,6 +1,5 @@
 import os
 import json
-import logging
 
 from threading import Thread, Event
 
@@ -8,15 +7,13 @@ import poppytools
 
 from pypot.vrep import from_vrep
 
-from spawn import spawn_vrep
+from spawn import spawn_vrep, stop_vrep
 
 
 class VrepXp(object):
-    def __init__(self, robot_config,
-                 port, scene, gui=False):
+    def __init__(self, robot_config, scene, gui=False):
 
         self.robot_config = robot_config
-        self.port = port
         self.scene = scene
         self.gui = gui
 
@@ -27,7 +24,7 @@ class VrepXp(object):
         Thread(target=self._target).start()
 
     def setup(self):
-        self._vrep_proc = spawn_vrep(self.port, self.gui, self.scene, start=True)
+        self._vrep_proc, self.port = spawn_vrep(self.gui, self.scene, start=True)
         self.robot = from_vrep(self.robot_config, '127.0.0.1', self.port)
 
     def run(self):
@@ -43,7 +40,7 @@ class VrepXp(object):
     def teardown(self):
         if hasattr(self, 'robot'):
             self.robot.close()
-        self._vrep_proc.terminate()
+        stop_vrep(self.port)
         self._running.clear()
 
     def _target(self):
@@ -57,11 +54,11 @@ class VrepXp(object):
 
 
 class PoppyVrepXp(VrepXp):
-    def __init__(self, port, scene, gui=False):
+    def __init__(self, scene, gui=False):
         configfile = os.path.join(os.path.dirname(poppytools.__file__),
                                   'configuration', 'poppy_config.json')
 
         with open(configfile) as f:
             poppy_config = json.load(f)
 
-        VrepXp.__init__(self, poppy_config, port, scene, gui)
+        VrepXp.__init__(self, poppy_config, scene, gui)
