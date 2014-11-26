@@ -27,8 +27,17 @@ class VrepXp(object):
     def setup(self):
         self._vrep_proc, self.port = spawn_vrep(
             self.gui, self.scene, start=True)
-        self.robot = from_vrep(
-            self.robot_config, '127.0.0.1', self.port, tracked_collisions=self.tracked_collisions)
+
+        done = False
+        while not done and self.port < 65535 and self.port > 1024:
+            try:
+
+                self.robot = from_vrep(
+                    self.robot_config, '127.0.0.1', self.port, tracked_collisions=self.tracked_collisions)
+
+            except:
+                print 'Error connecting to port:', self.port
+                self.port += 1
 
     def run(self):
         raise NotImplementedError
