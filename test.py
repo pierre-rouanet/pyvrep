@@ -2,6 +2,7 @@ import os
 import time
 
 from pyvrep.xp import PoppyVrepXp
+from pyvrep.pool import VrepXpPool
 
 import poppytools
 
@@ -26,8 +27,5 @@ if __name__ == '__main__':
     xp2 = MyWalkingXP('../pypot/samples/notebooks/poppy-sitting.ttt', gui=True)
     xp3 = MyWalkingXP('../pypot/samples/notebooks/poppy-sitting.ttt', gui=True)
 
-    xp.start()
-    xp2.start()
-
-    xp.wait()
-    xp2.wait()
+    pool = VrepXpPool([xp, xp2, xp3])
+    pool.run(2)
