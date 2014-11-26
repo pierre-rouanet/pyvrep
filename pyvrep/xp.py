@@ -9,6 +9,7 @@ from pypot.vrep import from_vrep
 from pypot.vrep.io import VrepConnectionError
 
 from spawn import spawn_vrep, stop_vrep
+import time
 
 
 class VrepXp(object):
@@ -21,7 +22,9 @@ class VrepXp(object):
         self.tracked_collisions = tracked_collisions
         self._running = Event()
 
-    def start(self):
+    def start(self, **kwargs):
+        for key, value in kwargs.iteritems():
+            setattr(self, key, value)
         self._running.set()
         Thread(target=self._target).start()
 
@@ -31,7 +34,10 @@ class VrepXp(object):
 
         while not done and (1024 < self.port < 65535):
             try:
-                self._vrep_proc, self.port = spawn_vrep(self.gui, self.scene, start=True)
+                self._vrep_proc, self.port = spawn_vrep(
+                    self.gui, self.scene, start=True)
+
+                time.sleep(20)
                 self.robot = from_vrep(
                     self.robot_config, '127.0.0.1', self.port, tracked_collisions=self.tracked_collisions)
                 done = True
