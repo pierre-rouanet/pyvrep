@@ -6,6 +6,7 @@ from threading import Thread, Event
 import poppytools
 
 from pypot.vrep import from_vrep
+from pypot.vrep.io import VrepConnectionError
 
 from spawn import spawn_vrep, stop_vrep
 
@@ -25,18 +26,19 @@ class VrepXp(object):
         Thread(target=self._target).start()
 
     def setup(self):
-        self._vrep_proc, self.port = spawn_vrep(
-            self.gui, self.scene, start=True)
-
         done = False
-        while not done and self.port < 65535 and self.port > 1024:
-            try:
+        self.port = 2000
 
+        while not done and (1024 < self.port < 65535):
+            try:
+                self._vrep_proc, self.port = spawn_vrep(self.gui, self.scene, start=True)
                 self.robot = from_vrep(
                     self.robot_config, '127.0.0.1', self.port, tracked_collisions=self.tracked_collisions)
+                done = True
 
-            except:
+            except VrepConnectionError:
                 print 'Error connecting to port:', self.port
+                stop_vrep(self.port)
                 self.port += 1
 
     def run(self):
@@ -62,7 +64,8 @@ class VrepXp(object):
         except:
             raise
         finally:
-            self.teardown()
+            if hasattr(self, 'port'):
+                self.teardown()
 
 
 class PoppyVrepXp(VrepXp):
