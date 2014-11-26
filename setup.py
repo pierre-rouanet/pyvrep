@@ -10,7 +10,7 @@ def setup_vrep_folder():
 
 setup_vrep_folder()
 
-setup(name='pypot',
+setup(name='pyvrep',
       version='0.1',
       packages=['pyvrep', ],
 
