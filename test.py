@@ -21,16 +21,22 @@ class MyWalkingXP(PoppyVrepXp):
         print 'running on port', self.port
         time.sleep(5)
 
+        print 'stopping', self.port
         walk.stop()
 
 
 if __name__ == '__main__':
     xp = MyWalkingXP(
-        '../pypot/samples/notebooks/poppy-standing.ttt', process=False, gui=False)
+        '../pypot/samples/notebooks/poppy-standing.ttt', process=True, gui=False)
     xp2 = MyWalkingXP(
-        '../pypot/samples/notebooks/poppy-sitting.ttt', process=False, gui=False)
-    xp3 = MyWalkingXP(
-        '../pypot/samples/notebooks/poppy-sitting.ttt', process=False, gui=False)
+        '../pypot/samples/notebooks/poppy-sitting.ttt', process=True, gui=False)
+    # xp3 = MyWalkingXP(
+    #     '../pypot/samples/notebooks/poppy-sitting.ttt', process=False, gui=False)
 
-    pool = VrepXpPool([xp, xp2, xp3])
-    pool.run(2)
+    # pool = VrepXpPool([xp, xp2, xp3])
+    # pool.run(2)
+
+    xp.start()
+    xp2.start()
+    xp.wait()
+    xp2.wait()

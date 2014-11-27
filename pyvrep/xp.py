@@ -37,7 +37,9 @@ class VrepXp(object):
         if not self.process:
             Thread(target=self._target).start()
         else:
-            Process(target=self._target).start()
+            self.setup()
+            self._p = Process(target=self._target)
+            self._p.start()
 
     def setup(self):
         done = False
@@ -47,8 +49,8 @@ class VrepXp(object):
             try:
                 self._vrep_proc, self.port = spawn_vrep(
                     self.gui, self.scene, start=True)
-
-                time.sleep(20)
+                # print 'started', self.port
+                time.sleep(2)
                 self.robot = from_vrep(
                     self.robot_config, '127.0.0.1', self.port, tracked_collisions=self.tracked_collisions)
                 done = True
@@ -66,17 +68,25 @@ class VrepXp(object):
         return self._running.is_set()
 
     def wait(self):
-        self._running.wait()
+        if not self.process:
+
+            self._running.wait()
+        else:
+            self._p.join()
 
     def teardown(self):
+
         if hasattr(self, 'robot'):
             self.robot.close()
+
         stop_vrep(self.port)
+
         self._running.clear()
 
     def _target(self):
         try:
-            self.setup()
+            if not self.process:
+                self.setup()
             self.run()
         except:
             raise
