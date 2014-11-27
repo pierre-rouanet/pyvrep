@@ -16,8 +16,9 @@ class MyWalkingXP(PoppyVrepXp):
                                     'behavior', 'IROS_Normal_Gait.mat')
 
         walk = WalkingGaitFromMat(self.robot, cpg_filename)
-        walk.start()
         print 'Started on port', self.port
+        walk.start()
+        print 'running on port', self.port
         time.sleep(5)
 
         walk.stop()
@@ -25,11 +26,11 @@ class MyWalkingXP(PoppyVrepXp):
 
 if __name__ == '__main__':
     xp = MyWalkingXP(
-        '../pypot/samples/notebooks/poppy-standing.ttt', gui=True)
+        '../pypot/samples/notebooks/poppy-standing.ttt', process=False, gui=False)
     xp2 = MyWalkingXP(
-        '../pypot/samples/notebooks/poppy-sitting.ttt', gui=True)
+        '../pypot/samples/notebooks/poppy-sitting.ttt', process=False, gui=False)
     xp3 = MyWalkingXP(
-        '../pypot/samples/notebooks/poppy-sitting.ttt', gui=True)
+        '../pypot/samples/notebooks/poppy-sitting.ttt', process=False, gui=False)
 
     pool = VrepXpPool([xp, xp2, xp3])
     pool.run(2)

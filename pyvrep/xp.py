@@ -2,6 +2,8 @@ import os
 import json
 
 from threading import Thread, Event
+from multiprocessing import Process
+from multiprocessing import Event as ProcEvent
 
 import poppytools
 
@@ -14,19 +16,28 @@ import time
 
 class VrepXp(object):
 
-    def __init__(self, robot_config, scene, tracked_collisions=[], gui=False):
+    def __init__(self, robot_config, scene, tracked_collisions=[], process=False, gui=False):
 
         self.robot_config = robot_config
         self.scene = scene
         self.gui = gui
         self.tracked_collisions = tracked_collisions
-        self._running = Event()
+        self.process = process
+
+        if not self.process:
+            self._running = Event()
+        else:
+            self._running = ProcEvent()
 
     def start(self, **kwargs):
         for key, value in kwargs.iteritems():
             setattr(self, key, value)
+
         self._running.set()
-        Thread(target=self._target).start()
+        if not self.process:
+            Thread(target=self._target).start()
+        else:
+            Process(target=self._target).start()
 
     def setup(self):
         done = False
@@ -76,11 +87,12 @@ class VrepXp(object):
 
 class PoppyVrepXp(VrepXp):
 
-    def __init__(self, scene, tracked_collisions=[], gui=False):
+    def __init__(self, scene, tracked_collisions=[], process=False, gui=False):
         configfile = os.path.join(os.path.dirname(poppytools.__file__),
                                   'configuration', 'poppy_config.json')
 
         with open(configfile) as f:
             poppy_config = json.load(f)
 
-        VrepXp.__init__(self, poppy_config, scene, tracked_collisions, gui)
+        VrepXp.__init__(
+            self, poppy_config, scene, tracked_collisions, process, gui)
