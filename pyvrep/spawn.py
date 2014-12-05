@@ -23,7 +23,7 @@ class Vrep(object):
         if not gui:
             args.append('-h')
 
-        args.append(os.path.join(os.getcwd(), scene))
+        args.append(scene)
         args.append('-s')
 
         self.p = Popen([vrep_bin] + args, stdout=PIPE)

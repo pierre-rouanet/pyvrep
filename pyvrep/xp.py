@@ -23,7 +23,7 @@ class VrepXp(object):
         if not os.path.exists(scene):
             raise ValueError('{} does not exist!'.format(scene))
 
-        self.scene = scene
+        self.scene = scene if os.path.isabs(scene) else os.path.join(os.getcwd(), scene)
 
     def spawn(self, log=None, gui=False, avakas=False):
         try:
