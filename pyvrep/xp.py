@@ -31,6 +31,10 @@ class VrepXp(object):
             self.robot = from_vrep(self.robot_config, '127.0.0.1', 19997)
 
             self.run()
+
+            if log:
+                with open(log, 'w') as f:
+                    self.save(f)
         except:
             raise
         finally:
@@ -38,9 +42,9 @@ class VrepXp(object):
                 self.robot.close()
             vrep.terminate()
 
-        if log:
-            with open(log, 'w') as f:
-                self.save(f)
+        # if log:
+        #     with open(log, 'w') as f:
+        #         self.save(f)
 
     def run(self):
         raise NotImplementedError
