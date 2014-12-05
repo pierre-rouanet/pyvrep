@@ -1,66 +1,47 @@
 import os
 import time
-import shutil
+import signal
 import platform
 
 from subprocess import Popen, PIPE
-from multiprocessing import Lock
 
-from _env import VREP_PATH
 
-vrep_processes = {}
-vrep_bin_folder = os.path.join(VREP_PATH,
+if 'VREP_PATH' not in os.environ:
+    raise SystemError('Please set the VREP_PATH variable in your environment!')
+
+vrep_path = os.environ['VREP_PATH']
+vrep_bin_folder = os.path.join(vrep_path,
                                ('vrep.app/Contents/MacOS'
                                 if platform.system() == 'Darwin' else ''))
 vrep_bin = os.path.join(vrep_bin_folder, 'vrep')
 
-config = os.path.join(vrep_bin_folder, 'remoteApiConnections.txt')
-bkp_config = config + '.bkp'
 
-vrep_config_template = """
-portIndex1_port                 = {}
-portIndex1_debug                = false
-portIndex1_syncSimTrigger       = true
-"""
+class Vrep(object):
+    def __init__(self, scene, gui):
+        args = []
 
-_spawn_lock = Lock()
+        if not gui:
+            args.append('-h')
 
-
-def spawn_vrep(gui=False, scene=None, start=False):
-
-    if not os.path.exists(bkp_config):
-        shutil.move(config, bkp_config)
-
-    args = []
-    if not gui:
-        args.append('-h')
-    if scene is not None:
         args.append(os.path.join(os.getcwd(), scene))
+        args.append('-s')
 
-        if start:
-            args.append('-s')
+        self.p = Popen([vrep_bin] + args, stdout=PIPE)
+        time.sleep(10)
 
-    with _spawn_lock:
-        port = 29997
-        while port in vrep_processes:
-            port += 1
-
-        with open(config, 'w') as f:
-            f.write(vrep_config_template.format(port))
-
-        p = Popen([vrep_bin] + args, stdout=PIPE)
-        vrep_processes[port] = p
-
-        # Just give enough time to vrep to
-        # actually starts the remote API server
-        time.sleep(10 if gui else 2)
-
-    return p, port
+    def terminate(self):
+        self.p.terminate()
 
 
-def stop_vrep(port):
-    vrep_processes.pop(port).terminate()
+class AvakasVrep(object):
+    def __init__(self, scene, num_proc=99):
+        self.num_proc = num_proc
+        self.p = Popen(['xvfb-run', '--server-num={}'.format(self.num_proc),
+                        vrep_bin, '-h', scene, '-s'])
+        time.sleep(20)
 
+    def terminate(self):
+        with open('/tmp/.X{}-lock'.format(self.num_proc)) as f:
+            pid = int(f.read().strip())
 
-def killall_vrep():
-    [stop_vrep(port) for port in vrep_processes]
+        os.kill(pid, signal.SIGINT)
