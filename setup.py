@@ -3,13 +3,6 @@
 from setuptools import setup
 
 
-def setup_vrep_folder():
-    with open('pyvrep/_env.py', 'w') as f:
-        vrep_folder = raw_input('V-Rep Folder? --> ')
-        f.write('VREP_PATH = "{}"\n'.format(vrep_folder))
-
-setup_vrep_folder()
-
 setup(name='pyvrep',
       version='0.1',
       packages=['pyvrep', ],
@@ -20,3 +13,6 @@ setup(name='pyvrep',
       url='https://github.com/pierre-rouanet/pyvrep',
       license='GNU GENERAL PUBLIC LICENSE Version 3',
       )
+
+
+print '*** Make sure you setup the VREP_PATH variable in your environment! ***'
