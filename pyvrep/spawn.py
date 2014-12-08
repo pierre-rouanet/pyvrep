@@ -36,8 +36,8 @@ class Vrep(object):
 class AvakasVrep(object):
     def __init__(self, scene, num_proc=99):
         self.num_proc = num_proc
-        self.p = Popen(['xvfb-run', '--server-num={}'.format(self.num_proc),
-                        vrep_bin, '-h', scene, '-s'])
+        self.p = Popen(['sh', os.path.join(vrep_path, '..', 'my-vrep.sh'),
+                        self.num_proc, scene])
         time.sleep(20)
 
     def terminate(self):
