@@ -37,7 +37,7 @@ class AvakasVrep(object):
     def __init__(self, scene, num_proc=99):
         self.num_proc = num_proc
         self.p = Popen(['sh', os.path.join(vrep_path, '..', 'my-vrep.sh'),
-                        self.num_proc, scene])
+                        str(self.num_proc), scene])
         time.sleep(20)
 
     def terminate(self):
